@@ -17,20 +17,37 @@ elif model not in ["117M", "SortaBig", "encoder"]:
     print("Unknown model! Currently available models: 117M, SortaBig")
     sys.exit(1)
 
-subdir = os.path.join('models', model)
-if not os.path.exists(subdir):
-    os.makedirs(subdir)
-subdir = subdir.replace('\\','/') # needed for Windows
 
-for filename in ['checkpoint','encoder.json','model.ckpt.data-00000-of-00001', 'model.ckpt.index', 'model.ckpt.meta', 'vocab.bpe']:
+if not os.path.exists(model):
+    os.makedirs(model)
+if not os.path.exists("encoder"):
+    os.makedirs("encoder")
 
-    r = requests.get("https://storage.googleapis.com/connors-models/" + subdir + "/" + filename, stream=True)
+for filename in ['encoder.json', 'vocab.bpe']:
 
-    with open(os.path.join(subdir, filename), 'wb') as f:
+    r = requests.get("https://storage.googleapis.com/connors-models/public/encoder" + filename, stream=True)
+
+    with open(os.path.join("encoder", filename), 'wb') as f:
         file_size = int(r.headers["content-length"])
         chunk_size = 1000
         with tqdm(ncols=100, desc="Fetching " + filename, total=file_size, unit_scale=True) as pbar:
             # 1k for chunk_size, since Ethernet packet size is around 1500 bytes
             for chunk in r.iter_content(chunk_size=chunk_size):
                 f.write(chunk)
-pbar.update(chunk_size)
+            pbar.update(chunk_size)
+
+if model == "encoder":
+    sys.exit()
+
+for filename in ['checkpoint', 'model.ckpt.data-00000-of-00001', 'model.ckpt.index', 'model.ckpt.meta']:
+
+    r = requests.get("https://storage.googleapis.com/connors-models/public/" + model + "/" + filename, stream=True)
+
+    with open(os.path.join(model, filename), 'wb') as f:
+        file_size = int(r.headers["content-length"])
+        chunk_size = 1000
+        with tqdm(ncols=100, desc="Fetching " + filename, total=file_size, unit_scale=True) as pbar:
+            # 1k for chunk_size, since Ethernet packet size is around 1500 bytes
+            for chunk in r.iter_content(chunk_size=chunk_size):
+                f.write(chunk)
+            pbar.update(chunk_size)
