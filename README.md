@@ -45,10 +45,10 @@ Prediction on TPUs is not supported.
 ## Generating the Dataset
 GPT2 is trained on the webtext corpus, which is basically all websites linked to from reddit with at least 3 Karma. Since the database is huge and contains a lot of copyrighted material, I can't provide a download here. Instead I'll describe how I got it. Be aware it cost me around ~500€ in cloud compute resources to donwload and process the whole thing, but I'm not claiming I was optimally efficient. 
 1. Use the download script from [here](https://github.com/jcpeterson/openwebtext) to download the archives (I used the prefilteres URLs file)
-2. Use *datasets/run_newspaper_extract.py* to extract the text. 
-3. Once you have the raw .txt files use *datasets/create_tfrecords.py* to encode them into correct .tfrecords files.
-4. Place the .tfrecords files into a Google Storage bucket. (This is mandatory if you're using TPUs)
-5. Change the "data_path" parameter to point to where your files are located and, if necessary, adapt the functions in inputs.py to open the correct filenames, in case you changed them.
+2. Use *datasets/run_newspaper_extract.py* to extract the text
+3. Once you have the raw .txt files use *datasets/create_tfrecords.py* to encode them into correct .tfrecords files
+4. Place the .tfrecords files into a Google Storage bucket (This is mandatory if you're using TPUs)
+5. Change the "data_path" parameter to point to where your files are located and, if necessary, adapt the functions in *inputs.py* to open the correct filenames, in case you changed them
 
 
 ## Explanation of Parameters
@@ -60,7 +60,7 @@ Values you'll definitely want to change:
 * **encoder_path**: Path to the BPE encoder files. To get this, use the download_model.py script from [here](https://github.com/openai/gpt-2) to download any model. You will also get a folder called "encoder". This is what you want this to point to (only required for prediction)
 
 Values you'll probably want to change:
-* **train_batch_size**: Batch size during training phase. (varies depending on your model and hardware)
+* **train_batch_size**: Batch size during training phase (varies depending on your model and hardware)
 * **eval_batch_size**: Batch size during evaluation
 * **predict_batch_size**: Batch size during prediction
 * **predict_path**: Where to save predictions (point this to a text file to append to)
@@ -77,7 +77,7 @@ Model parameters:
 Training parameters:
 * **input**: Which input function to use (default: "openwebtext")
 * **lr**: Learning rate (default: 0.00025)
-* **warmup_steps**: Number of (linear) warmup steps (default: 2000)
+* **warmup_steps**: Number of (linear) warmup steps. If this is set, a linear warmup + cosine decay schedule is used (default: 2000)
 * **opt_name**: Name of optimizer, currently only "adamW" implemented (default: "adamW")
 * **beta1**: Adam beta1 parameter (default: 0.9)
 * **beta2**: Adam beta2 parameter (default: 0.98)
