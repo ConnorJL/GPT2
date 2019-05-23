@@ -16,7 +16,7 @@ def create_train_op(loss, params):
             beta2=opt_params["beta2"],
             epsilon=opt_params["epsilon"])
 
-    elif opt_params["name"] == "adafactor": # TODO
+    elif opt_params["name"] == "adafactor":
         if opt_params["wd_type"] == "adam":
             decay_rate = adafactor_decay_rate_adam(opt_params["beta2"])
         elif opt_params["wd_type"] == "pow":
@@ -37,7 +37,7 @@ def create_train_op(loss, params):
     if params["use_tpu"]:
         optimizer = tf.contrib.tpu.CrossShardOptimizer(optimizer)
 
-    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS) # To update batchnorm
+    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS) # To update batchnorm, if present
     train_op = optimizer.minimize(loss, global_step=tf.train.get_global_step())
     train_op = tf.group([train_op, update_ops])
 

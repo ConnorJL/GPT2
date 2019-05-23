@@ -9,7 +9,8 @@
         "beta1": 0.9,
         "beta2": 0.98,
         "epsilon": 1e-9,
-        "name": "adamW"
+        "name": "adamW",
+        "weight_decay": 0.01
     },
     "train_batch_size": 32,
     "attn_dropout": 0.1,
@@ -25,7 +26,7 @@
     "n_embd": 768,
     "input": "openwebtext",
     "model": "GPT2",
-    "model_dir": "gs://connors-models/GPT2-117M-WDlowlr",
+    "model_dir": "gs://connors-models/GPT2-117M-long",
     "n_ctx": 1024,
     "predict_path": "logs/predictions.txt",
     "n_layer": 12
