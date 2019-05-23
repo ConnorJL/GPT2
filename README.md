@@ -19,7 +19,7 @@ For generating the dataset (in addition to Tensorflow):
 
 `pip3 install ftfy tqdm newspaper3k`
 
-## Downloading pretrained models
+## Downloading pretrained models (coming soon)
 If you want to use my models rather than OpenAI's, I currently have "117M" and "SortaBig" to offer. 117M was trained on a single v2 TPU for a week (probably less than the original OpenAI model), SortaBig is slightly bigger than 345M and was trained on a v2-256 pod for a week.
 
 `python3 download_model.py SortaBig`
