@@ -76,7 +76,7 @@ if __name__ == "__main__":
         tpu_cluster_resolver = tf.contrib.cluster_resolver.TPUClusterResolver(args.tpu)
 
         run_config = tf.contrib.tpu.RunConfig(
-            model_dir=params["model_dir"],
+            model_dir=params["model_path"],
             cluster=tpu_cluster_resolver,
             save_checkpoints_secs=60*10,
             session_config=tf.ConfigProto(
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         # Non TPU setup
         params["batch_size"] = params["train_batch_size"]
         run_config = tf.estimator.RunConfig(
-            model_dir=params["model_dir"],
+            model_dir=params["model_path"],
             session_config=tf.ConfigProto(
                 # log_device_placement=True,
                 # allow_soft_placement=True
