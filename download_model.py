@@ -9,11 +9,7 @@ if len(sys.argv) != 2:
 
 model = sys.argv[1]
 
-if model == "1.7B":
-    print("1.7B isn't released just yet, sorry!")
-    sys.exit(1)
-
-elif model not in ["117M", "SortaBig", "encoder"]:
+if model not in ["117M", "SortaBig", "encoder"]:
     print("Unknown model! Currently available models: 117M, SortaBig")
     sys.exit(1)
 
@@ -25,7 +21,7 @@ if not os.path.exists("encoder"):
 
 for filename in ['encoder.json', 'vocab.bpe']:
 
-    r = requests.get("https://storage.googleapis.com/connors-models/public/encoder" + filename, stream=True)
+    r = requests.get("https://storage.googleapis.com/connors-models/public/encoder/" + filename, stream=True)
 
     with open(os.path.join("encoder", filename), 'wb') as f:
         file_size = int(r.headers["content-length"])
@@ -34,7 +30,7 @@ for filename in ['encoder.json', 'vocab.bpe']:
             # 1k for chunk_size, since Ethernet packet size is around 1500 bytes
             for chunk in r.iter_content(chunk_size=chunk_size):
                 f.write(chunk)
-            pbar.update(chunk_size)
+                pbar.update(chunk_size)
 
 if model == "encoder":
     sys.exit()
@@ -50,4 +46,4 @@ for filename in ['checkpoint', 'model.ckpt.data-00000-of-00001', 'model.ckpt.ind
             # 1k for chunk_size, since Ethernet packet size is around 1500 bytes
             for chunk in r.iter_content(chunk_size=chunk_size):
                 f.write(chunk)
-            pbar.update(chunk_size)
+                pbar.update(chunk_size)
