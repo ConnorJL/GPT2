@@ -98,7 +98,10 @@ if __name__ == "__main__":
 
     else:
         # Non TPU setup
-        params["batch_size"] = params["train_batch_size"]
+        if not predict_mode:
+            params["batch_size"] = params["train_batch_size"]
+        else:
+            params["batch_size"] = params["predict_batch_size"]
         run_config = tf.estimator.RunConfig(
             model_dir=params["model_path"],
             session_config=tf.ConfigProto(
