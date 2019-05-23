@@ -43,7 +43,7 @@ def conv1d(x, scope, nf, *, w_init_stdev=0.02, scale=1.0):
         *start, nx = shape_list(x)
         if scope=="c_attn":
             scale = 1.0
-        w = tf.get_variable('w', [1, nx, nf], initializer=ScaledNormalInitializer(stddev=w_init_stdev, scale=scale)) # tf.random_normal_initializer(stddev=w_init_stdev)
+        w = tf.get_variable('w', [1, nx, nf], initializer=ScaledNormalInitializer(stddev=w_init_stdev, scale=scale))
         b = tf.get_variable('b', [nf], initializer=tf.constant_initializer(0))
         c = tf.reshape(tf.matmul(tf.reshape(x, [-1, nx]), tf.reshape(w, [-1, nf]))+b, start+[nf])
         return c
@@ -151,6 +151,7 @@ def _assert_float_dtype(dtype):
         raise ValueError("Expected floating point type, got %s." % dtype)
     return dtype
 
+# Initializer that scales the parameters as in the original paper
 class ScaledNormalInitializer(tf.keras.initializers.Initializer):
     def __init__(self, mean=0.0, stddev=1.0, seed=None, dtype=tf.dtypes.float32, scale=1.0):
         self.mean = mean

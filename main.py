@@ -78,7 +78,7 @@ if __name__ == "__main__":
         run_config = tf.contrib.tpu.RunConfig(
             model_dir=params["model_path"],
             cluster=tpu_cluster_resolver,
-            save_checkpoints_secs=60*10,
+            save_checkpoints_secs=60*60,
             session_config=tf.ConfigProto(
                 # allow_soft_placement=True, 
                 # log_device_placement=True

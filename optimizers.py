@@ -3,8 +3,7 @@ import tensorflow as tf
 
 
 def create_train_op(loss, params):
-    opt_params = params["opt_params"]
-    lr = opt_params["lr"]
+    lr = params["lr"]
     if "warmup_steps" in params.keys():
         lr = cosine_decay_with_warmup(tf.train.get_global_step(), lr, params["max_steps"], warmup_steps=params["warmup_steps"])
 

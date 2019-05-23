@@ -8,7 +8,7 @@
     "beta1": 0.9,
     "beta2": 0.98,
     "epsilon": 1e-9,
-    "name": "adamW",
+    "opt_name": "adamW",
     "weight_decay": 0.01,
     "train_batch_size": 32,
     "attn_dropout": 0.1,
