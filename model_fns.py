@@ -35,7 +35,7 @@ def gpt2_model(features, labels, mode, params):
                 loss=loss, eval_metrics=(perplexity_metric, {"loss": output["raw_loss"]}))
         else:
             return tf.estimator.EstimatorSpec(mode=mode, 
-                loss=loss, eval_metrics=perplexity_metric(output["raw_loss"]))
+                loss=loss, eval_metric_ops=perplexity_metric(output["raw_loss"]))
 
 
     if mode == tf.estimator.ModeKeys.PREDICT:

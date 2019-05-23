@@ -20,9 +20,9 @@ For generating the dataset (in addition to Tensorflow):
 `pip3 install ftfy tqdm newspaper3k`
 
 ## Downloading Pretrained Models
-If you want to use my models, I currently have "117M" and "SortaBig" to offer. 117M was trained on a single v2 TPU for a week (probably less than the original OpenAI model), SortaBig is slightly bigger than 345M and was trained on a v2-256 pod for a week.
+If you want to use my models, I currently have "117M" and "PrettyBig" to offer. 117M was trained on a single v2 TPU for a week (probably less than the original OpenAI model), PrettyBig is slightly bigger than 345M and was trained on a v2-256 pod for a week.
 
-`python3 download_model.py SortaBig`
+`python3 download_model.py PrettyBig`
 
 This will create two directories, one named as the model and another named "encoder". Change the "model_dir" and "encoder_path" parameters in the .json corresponding to your model to point to these paths, respectively.
 

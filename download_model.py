@@ -9,7 +9,7 @@ if len(sys.argv) != 2:
 
 model = sys.argv[1]
 
-if model not in ["117M", "SortaBig", "encoder"]:
+if model not in ["117M", "PrettyBig", "encoder"]:
     print("Unknown model! Currently available models: 117M, SortaBig")
     sys.exit(1)
 
@@ -35,7 +35,10 @@ for filename in ['encoder.json', 'vocab.bpe']:
 if model == "encoder":
     sys.exit()
 
-for filename in ['checkpoint', 'model.ckpt.data-00000-of-00001', 'model.ckpt.index', 'model.ckpt.meta']:
+with open(os.path.join(model, "checkpoint"), "w") as f:
+        f.write("model_checkpoint_path: \"model.ckpt\"\n")
+
+for filename in ['model.ckpt.data-00000-of-00001', 'model.ckpt.index', 'model.ckpt.meta']:
 
     r = requests.get("https://storage.googleapis.com/connors-models/public/" + model + "/" + filename, stream=True)
 
