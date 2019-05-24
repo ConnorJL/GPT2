@@ -16,12 +16,16 @@ def softmax(x, axis=-1):
 def gelu(x):
     return 0.5*x*(1+tf.tanh(np.sqrt(2/np.pi)*(x+0.044715*tf.pow(x, 3))))
 
-def norm(x, scope, *, axis=-1, epsilon=1e-5):
+def norm(x, scope, *, axis=-1, epsilon=1e-5, params=None):
     """Normalize to mean = 0, std = 1, then do a diagonal affine transform."""
     with tf.variable_scope(scope):
         n_state = x.shape[-1].value
-        g = tf.get_variable('g', [n_state], initializer=tf.constant_initializer(1))
-        b = tf.get_variable('b', [n_state], initializer=tf.constant_initializer(0))
+        if params["precision"] == "bfloat16":
+            g = tf.get_variable('g', [n_state], initializer=tf.constant_initializer(1, dtype=tf.bfloat16), dtype=tf.bfloat16)
+            b = tf.get_variable('b', [n_state], initializer=tf.constant_initializer(0, dtype=tf.bfloat16), dtype=tf.bfloat16)
+        else:
+            g = tf.get_variable('g', [n_state], initializer=tf.constant_initializer(1))
+            b = tf.get_variable('b', [n_state], initializer=tf.constant_initializer(0))
         u = tf.reduce_mean(x, axis=axis, keepdims=True)
         s = tf.reduce_mean(tf.square(x-u), axis=axis, keepdims=True)
         x = (x - u) * tf.rsqrt(s + epsilon)
@@ -38,13 +42,17 @@ def merge_states(x):
     *start, a, b = shape_list(x)
     return tf.reshape(x, start + [a*b])
 
-def conv1d(x, scope, nf, *, w_init_stdev=0.02, scale=1.0):
+def conv1d(x, scope, nf, *, w_init_stdev=0.02, scale=1.0, params=None):
     with tf.variable_scope(scope):
         *start, nx = shape_list(x)
         if scope=="c_attn":
             scale = 1.0
-        w = tf.get_variable('w', [1, nx, nf], initializer=ScaledNormalInitializer(stddev=w_init_stdev, scale=scale))
-        b = tf.get_variable('b', [nf], initializer=tf.constant_initializer(0))
+        if params["precision"] == "bfloat16":
+            w = tf.get_variable('w', [1, nx, nf], initializer=ScaledNormalInitializer(stddev=w_init_stdev, scale=scale, dtype=tf.bfloat16), dtype=tf.bfloat16)
+            b = tf.get_variable('b', [nf], initializer=tf.constant_initializer(0, dtype=tf.bfloat16), dtype=tf.bfloat16)
+        else:
+            w = tf.get_variable('w', [1, nx, nf], initializer=ScaledNormalInitializer(stddev=w_init_stdev, scale=scale))
+            b = tf.get_variable('b', [nf], initializer=tf.constant_initializer(0))
         c = tf.reshape(tf.matmul(tf.reshape(x, [-1, nx]), tf.reshape(w, [-1, nf]))+b, start+[nf])
         return c
 
@@ -95,7 +103,7 @@ def attn(x, scope, n_state, *, past, params, train=False):
         return a
 
     with tf.variable_scope(scope):
-        c = conv1d(x, 'c_attn', n_state*3)
+        c = conv1d(x, 'c_attn', n_state*3, params=params)
         q, k, v = map(split_heads, tf.split(c, 3, axis=2))
         present = tf.stack([k, v], axis=1)
         if past is not None:
@@ -104,7 +112,7 @@ def attn(x, scope, n_state, *, past, params, train=False):
             v = tf.concat([pv, v], axis=-2)
         a = multihead_attn(q, k, v)
         a = merge_heads(a)
-        a = conv1d(a, 'c_proj', n_state, scale=params["scale"])
+        a = conv1d(a, 'c_proj', n_state, scale=params["scale"], params=params)
         a = dropout(a, params["res_dropout"], train)
         return a, present
 
@@ -112,8 +120,8 @@ def attn(x, scope, n_state, *, past, params, train=False):
 def mlp(x, scope, n_state, *, params, train=False):
     with tf.variable_scope(scope):
         nx = x.shape[-1].value
-        h = gelu(conv1d(x, 'c_fc', n_state))
-        h2 = conv1d(h, 'c_proj', nx, scale=params["scale"])
+        h = gelu(conv1d(x, 'c_fc', n_state, params=params))
+        h2 = conv1d(h, 'c_proj', nx, scale=params["scale"], params=params)
         h2 = dropout(h2, params["res_dropout"], train)
         return h2
 
@@ -121,9 +129,9 @@ def mlp(x, scope, n_state, *, params, train=False):
 def block(x, scope, *, past, params, train=False):
     with tf.variable_scope(scope):
         nx = x.shape[-1].value
-        a, present = attn(norm(x, 'ln_1'), 'attn', nx, past=past, params=params, train=train)
+        a, present = attn(norm(x, 'ln_1', params=params), 'attn', nx, past=past, params=params, train=train)
         x = x + a
-        m = mlp(norm(x, 'ln_2'), 'mlp', nx*4, params=params, train=train)
+        m = mlp(norm(x, 'ln_2', params=params), 'mlp', nx*4, params=params, train=train)
         x = x + m
         return x, present
 
@@ -176,15 +184,22 @@ class ScaledNormalInitializer(tf.keras.initializers.Initializer):
         }
 
 
-def model(X, params, labels=None, past=None, scope='model', reuse=False, train=False, eval=False):
+def model(X, params, labels=None, past=None, scope='model', reuse=False, train=False):
     with tf.variable_scope(scope, reuse=reuse):
         results = {}
         batch, sequence = shape_list(X)
 
-        wpe = tf.get_variable('wpe', [params["n_ctx"], params["n_embd"]], # Position encoding
-                             initializer=tf.random_normal_initializer(stddev=0.01))
-        wte = tf.get_variable('wte', [params["n_vocab"], params["n_embd"]], # Text encoding
-                             initializer=tf.random_normal_initializer(stddev=0.02))
+        if params["precision"] == "bfloat16":
+            wpe = tf.get_variable('wpe', [params["n_ctx"], params["n_embd"]], # Position encoding
+                             initializer=tf.random_normal_initializer(stddev=0.01, dtype=tf.bfloat16), dtype=tf.bfloat16)
+            wte = tf.get_variable('wte', [params["n_vocab"], params["n_embd"]], # Text encoding
+                             initializer=tf.random_normal_initializer(stddev=0.02, dtype=tf.bfloat16), dtype=tf.bfloat16)
+
+        else:
+            wpe = tf.get_variable('wpe', [params["n_ctx"], params["n_embd"]], # Position encoding
+                                initializer=tf.random_normal_initializer(stddev=0.01))
+            wte = tf.get_variable('wte', [params["n_vocab"], params["n_embd"]], # Text encoding
+                                initializer=tf.random_normal_initializer(stddev=0.02))
         past_length = 0 if past is None else tf.shape(past)[-2]
 
         wpe = dropout(wpe, params["embed_dropout"], train)
@@ -200,18 +215,10 @@ def model(X, params, labels=None, past=None, scope='model', reuse=False, train=F
             h, present = block(h, 'h%d' % layer, past=past, params=params, train=train)
             presents.append(present)
         results['present'] = tf.stack(presents, axis=1)
-        h = norm(h, 'ln_f')
+        h = norm(h, 'ln_f', params=params)
 
         h_flat = tf.reshape(h, [batch*sequence, params["n_embd"]])
         logits = tf.matmul(h_flat, wte, transpose_b=True)
         logits = tf.reshape(logits, [batch, sequence, params["n_vocab"]])
         results['logits'] = logits
-
-        if train or eval:
-            # labels = [batch*sequence]
-            raw_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels)
-            loss = tf.reduce_mean(raw_loss)
-            results["raw_loss"] = raw_loss
-            results["loss"] = loss
-
         return results

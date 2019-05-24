@@ -31,9 +31,10 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str) # JSON file that contains model parameters
     parser.add_argument("--predict_file", type=str) # File to take as input for predict
     parser.add_argument("--predict_text", type=str) # Take string directly from args
+    parser.add_argument("--top_k", type=int) # Top K truncation parameter for text generation
     args = parser.parse_args()
 
-    # Get prediction input text
+    # Get prediction text
     predict_mode = False
     if args.predict_file is not None:
         predict_mode = True
@@ -45,7 +46,8 @@ if __name__ == "__main__":
     elif args.predict_file is not None and args.predict_text is not None:
         print("ERROR: Specify exactly one of --predict_file and --predict_text!")
         sys.exit()
-
+    
+    
     # Setup logging
     Path("logs").mkdir(exist_ok=True)
     tf.logging.set_verbosity(logging.INFO)
@@ -65,6 +67,15 @@ if __name__ == "__main__":
     else:
         params["use_tpu"] = False
 
+    if args.top_k is not None:
+        params["top_k"] = args.top_k
+
+    if not "precision" in params.keys():
+        params["precision"] = "float32" # Doesn't actually do anything since float32 is the default anyways. Only recognized other dtype is "bfloat16"
+
+    if not "iterations" in params.keys():
+        params["iterations"] = 1 # Because this controls how many samples are prefetched
+
     logger.info(params)
 
     model_fn = models[params["model"]][0]
@@ -78,7 +89,7 @@ if __name__ == "__main__":
         run_config = tf.contrib.tpu.RunConfig(
             model_dir=params["model_path"],
             cluster=tpu_cluster_resolver,
-            save_checkpoints_secs=60*60,
+            save_checkpoints_secs=60*30,
             session_config=tf.ConfigProto(
                 # allow_soft_placement=True, 
                 # log_device_placement=True

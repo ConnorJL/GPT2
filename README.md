@@ -35,11 +35,13 @@ To predict you can either pass the prompt directly in the command line, or have 
 
 From command line:
 
-`python3 main.py --model Your-Model.json --predict_text "Hello there! My name is"`
+`python3 main.py --model Your-Model.json [--top_k Top-K-Truncation] --predict_text "Hello there! My name is"`
 
 From file:
 
-`python3 main.py --model Your-Model.json --predict_file input.txt`
+`python3 main.py --model Your-Model.json [--top_k Top-K-Truncation] --predict_file input.txt`
+
+The optional top_k parameter causes the model to only consider the top k most likely tokens at each step. Setting this around 40 tends to create better results, but with less variety. 
 
 Prediction on TPUs is not supported.
 
@@ -88,18 +90,21 @@ Model parameters:
 * **scale**: Factor by which to scale initializations of weights (default: 1/sqrt(n_layer))
 
 Training parameters:
+* **precision**: Whether to use float32 or bfloat16 variables (use "bfloat16" when training very large models) (optional, defaults to float32)
 * **input**: Which input function to use (default: "openwebtext")
 * **lr**: Learning rate (default: 0.00025)
-* **warmup_steps**: Number of warmup steps. If this is set, a linear warmup + cosine decay schedule is used (default: 2000)
-* **opt_name**: Name of optimizer, currently only "adamW" is implemented (default: "adamW")
-* **beta1**: Adam beta1 parameter (default: 0.9)
-* **beta2**: Adam beta2 parameter (default: 0.98)
+* **warmup_steps**: Number of warmup steps. If this is set, a linear warmup + cosine decay schedule is used (default: 2000) (optional)
+* **opt_name**: Name of optimizer, currently there are "adam" and "adafactor" (default: "adam")
+* **weight_decay**: Weight decay parameter, if not present no weight decay is used (the weight decay fix for Adam is used) (default: 0.01) (optional)
+* **beta1**: Adam/Adafactor beta1 parameter (adam default: 0.9, adafactor default: 0.0)
+* **beta2**: Adam/Adafactor beta2 parameter (default: 0.98) (optional for adafactor with pow decay type)
 * **epsilon**: Adam epsilon parameter (default: 1e-9)
-* **weight_decay**: Weight decay parameter (default: 0.01)
+* **decay_type**: Adafactor decay type, either "pow" or "adam" (default: "pow")
+* **decay_exponent**: Adafactor pow decay exponent (default: 0.8)
 * **train_steps**: Number of training steps to take between evaluations
 * **eval_steps**: Number of steps per evaluation
 * **max_steps**: The maximum number of training steps (important for declining lr)
-* **iterations**: Number of iterations to perform on TPUs (Only required for TPUs) (Default: 100)
-* **embed_dropout**: Dropout chance on the word embedding (default: 0.1)
-* **attn_dropout**: Dropout chance on attention layers (default: 0.1)
-* **res_dropout**: Dropout chance on residual connections (default: 0.1)
+* **iterations**: Number of iterations to perform on TPUs (Default: 100) (Only required for TPUs)
+* **embed_dropout**: Dropout chance on the word embedding, set to 0 to disable (default: 0.1)
+* **attn_dropout**: Dropout chance on attention layers, set to 0 to disable (default: 0.1)
+* **res_dropout**: Dropout chance on residual connections, set to 0 to disable (default: 0.1)
