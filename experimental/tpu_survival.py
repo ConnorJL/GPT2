@@ -26,7 +26,7 @@ class TPUSurvival(object):
             self.location = location
             self.prefix = params["name"]
             self.id = id
-            self.params = params["model_params"]
+            self.params = params
             self.running_time = 0.
             self.current_save = 0
             self.done = False
@@ -41,25 +41,22 @@ class TPUSurvival(object):
             self.current_save = d["current_save"]
             self.done = d["done"]
 
+
         
         # current running job
-        self.current_index = 0
         self.current_process = None
         self.state = None
         self.created = False
         self.task_running = False
 
 
-    def tpu_name(self, index=None):
+    def tpu_name(self):
         """Format tpu_name to be used in creation and deletion calls."""
-        index = index or self.current_index
-        return '{}-{}'.format(self.prefix, index)
+        return '{}'.format(self.prefix)
 
-    def tpu_cidr_block(self, index=None):
+    def tpu_cidr_block(self):
         """Format CIDR block to be used in creation calls."""
-        index = index or self.current_index
-        # Limited to 10 retries and a max of 24 experiments due to IPs
-        cidr = '10.0.{}.0/29'.format((self.id * 10) + index)
+        cidr = '10.0.{}.0/29'.format(self.id)
         return cidr
 
     def update_state(self):
@@ -75,8 +72,7 @@ class TPUSurvival(object):
 
             # The node that is running the current task.
             if tpu_name == self.tpu_name():
-                logging.info('{} - TPU health/state: {}: {}/{}'.format(self.prefix,
-                    tpu_name, health, state))
+                # logging.info('{} - TPU health/state: {}: {}/{}'.format(self.prefix, tpu_name, health, state))
                 self.state = state
 
         if self.state is None:
@@ -84,7 +80,7 @@ class TPUSurvival(object):
 
     def kill_current_task(self):
         """Kill the current running task."""
-        logging.info('{} - killing current process: {}'.format(self.prefix, self.current_index))
+        logging.info('{} - killing current process: {}'.format(self.prefix, self.current_process.pid))
 
         # The subprocess runs a shell command, which in turn calls python.
         # This kills the whole process group with the shell command as the
@@ -93,11 +89,6 @@ class TPUSurvival(object):
 
         self.task_running = False
         self.running_time += time.time() - self.started_time
-
-    def increment_index(self):
-        self.current_index += 1
-
-        logging.info('{} - current_index incremented to: {}'.format(self.prefix, self.current_index))
 
     # run_task should be called at the beginning and
     # then only after the call to kill current_process
@@ -111,7 +102,7 @@ class TPUSurvival(object):
         with open(self.prefix + ".json", "w") as f:
             json.dump(self.params["model_params"], f)
 
-        cmd = RUN_TASK_COMMAND.format(tpu_name=tpu_name, model=self.prefix)
+        cmd = RUN_TASK_COMMAND.format(tpu_name=tpu_name, model=self.prefix + ".json")
         command = shlex.split(cmd)
 
         # use popen so we can kill it when needed
@@ -122,11 +113,10 @@ class TPUSurvival(object):
 
         self.current_process = p
 
-    def delete(self, index=None):
-        """Delete the TPU node of the given index.
-        If the index is not provided the current node is deleted.
+    def delete(self):
+        """Delete the TPU node.
         """
-        tpu_name = self.tpu_name(index)
+        tpu_name = self.tpu_name()
 
         logging.info('{} - deleting: {}'.format(self.prefix, tpu_name))
 
@@ -136,9 +126,8 @@ class TPUSurvival(object):
 
         return p
 
-    def create(self, index=None):
-        """Create a TPU node of the given index.
-        If the index is not provided self.current_index is used.
+    def create(self):
+        """Create a TPU node.
         """
         tpu_name = self.tpu_name()
         tpu_cidr_block = self.tpu_cidr_block()
@@ -178,7 +167,8 @@ def list_tpus(project, location):
     Returns
     A Python dictionary with keys 'nodes' and 'nextPageToken'.
     """
-    service = discovery.build('tpu', 'v1', credentials=credentials)
+    logging.getLogger("googleapiclient.discovery").setLevel(logging.WARNING) # Silence URL spam
+    service = discovery.build('tpu', 'v1', credentials=credentials, cache_discovery=False)
 
     parent = 'projects/{}/locations/{}'.format(project, location)
 
@@ -203,7 +193,7 @@ def create_tpu(project, location, tpu_name, accelerator_type='v2-8',
     Returns
     A TPU node creation operation object.
     """
-    service = discovery.build('tpu', 'v1', credentials=credentials)
+    service = discovery.build('tpu', 'v1', credentials=credentials, cache_discovery=False)
 
     parent = 'projects/{}/locations/{}'.format(project, location)
 
@@ -233,7 +223,7 @@ def get_tpu(project, location, tpu_name):
     Returns
     A TPU node object.
     """
-    service = discovery.build('tpu', 'v1', credentials=credentials)
+    service = discovery.build('tpu', 'v1', credentials=credentials, cache_discovery=False)
 
     name = 'projects/{}/locations/{}/nodes/{}'.format(
         project, location, tpu_name)
@@ -252,7 +242,7 @@ def delete_tpu(project, location, tpu_name):
     Returns
     A TPU node deletion operation object.
     """
-    service = discovery.build('tpu', 'v1', credentials=credentials)
+    service = discovery.build('tpu', 'v1', credentials=credentials, cache_discovery=False)
 
     name = 'projects/{}/locations/{}/nodes/{}'.format(
         project, location, tpu_name)

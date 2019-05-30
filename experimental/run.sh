@@ -3,5 +3,5 @@ export MODEL=$2
 export SCRIPT_NAME=main.py
 
 python3 $SCRIPT_NAME \
-        --tpu=$TPU_NAME
-        --model=$MODEL
+        --tpu $TPU_NAME \
+        --model $MODEL

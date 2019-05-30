@@ -10,16 +10,25 @@ from experiments import experiments
 
 project = ''
 location = 'us-central1-f'
-max_attempts = 10
-logging.basicConfig(filename='logs/overrunner.log', level=logging.INFO)
-logging.getLogger().addHandler(logging.StreamHandler())
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+fh = logging.FileHandler('logs/overrunner.log')
+fh.setLevel(logging.INFO)
+sh = logging.StreamHandler()
+sh.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s:%(message)s') # Add timestamp to file logging
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+logger.addHandler(sh)
+
 backup_path = "gs://connors-models/backups"
 
 if not os.path.exists("logs"):
     os.mkdir("logs")
 
 if not os.path.exists("logs/state.json"):
-    runners = [TPUSurvival(project=project, location=location, id=i+1, params=ex) for i, ex in enumerate(experiments)]
+    runners = [TPUSurvival(project=project, location=location, id=i, params=ex) for i, ex in enumerate(experiments)]
 else:
     with open("logs/state.json", "r") as f:
         runners = [TPUSurvival(d=state) for state in json.load(f)]
@@ -44,7 +53,7 @@ try:
                 continue
             
             ts.update_state()
-            logging.info("{} - State {}".format(ts.prefix, ts.state))
+            logging.info("{} - TPU State: {} - Process Running: {}".format(ts.prefix, ts.state, ts.current_process is not None))
 
             if not ts.created:
                 logging.info("{} - Creating TPU".format(ts.prefix))
@@ -74,25 +83,18 @@ try:
                 ts.delete()
                 ts.kill_current_task()
 
-                # get ready for the next attempt
-                ts.increment_index()
-                if ts.current_index >= max_attempts:
-                    logging.error("{} hit max attempts!".format(ts.prefix))
-                    runners.remove(ts)
-                    continue
-
             if ts.running_time > 60*60*24: # Make a hard checkpoint save every day
                 logging.info("Backing up {}".format(ts.prefix))
                 subprocess.call(["gsutil", "cp", "-r", ts.params["model_dir"], 
                     os.path.join(backup_path, ts.params["model_dir"].split("/")[-1] + "-" + str(ts.current_save))])
                 ts.current_save += 1
 
-        if time.time() - running > 60*10: # Save state every hour
+        if time.time() - running > 60*60: # Save state every hour
             logging.info("Saving state")
             save(runners)
             running = time.time()
 
-        time.sleep(10)
+        time.sleep(30)
 
     logging.info("All runners done.")
 
