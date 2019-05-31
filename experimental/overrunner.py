@@ -53,7 +53,7 @@ try:
                 continue
             
             ts.update_state()
-            logging.info("{} - TPU State: {} - Process Running: {}".format(ts.prefix, ts.state, ts.current_process is not None))
+            logging.info("{} - TPU State: {} - Process Running: {}".format(ts.prefix, ts.state, ts.task_running))
 
             if not ts.created:
                 logging.info("{} - Creating TPU".format(ts.prefix))
@@ -64,7 +64,7 @@ try:
                 ts.run_task()
 
             returncode = None
-            if not ts.current_process is None:
+            if ts.task_running:
                 ts.current_process.poll()
                 returncode = ts.current_process.returncode
 
@@ -72,11 +72,12 @@ try:
                 logging.info('{} - Training process terminated with code: {}.'.format(ts.prefix,
                     returncode))
 
-                # clean up
-                ts.delete()
-                ts.done = True
-                runners.remove(ts)
-                continue
+                if returncode == 0:
+                    # clean up
+                    ts.delete()
+                    ts.done = True
+                    runners.remove(ts)
+                    continue
 
             if ts.state != "READY" and ts.task_running:
                 logging.info("{} - Preempted".format(ts.prefix))
