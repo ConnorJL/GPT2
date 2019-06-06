@@ -20,7 +20,7 @@ For generating the dataset (in addition to Tensorflow):
 `pip3 install ftfy tqdm newspaper3k`
 
 ## Downloading Pretrained Models
-If you want to use my models, I currently have "117M" and "PrettyBig" to offer. 117M was trained on a single v2 TPU for a week (probably less than the original OpenAI model), PrettyBig is slightly bigger than 345M and was trained on a v2-256 pod for a week.
+If you want to use my models, I currently have "117M" and "PrettyBig" to offer. 117M was trained on a single v2 TPU for a week (probably less than the original OpenAI model), PrettyBig is slightly bigger than 345M and was trained on a v2-256 pod for a week. I am planning on also releasing my version of 1.5B, which was trained on a v3-512 pod for around a week. Please see my blogposts [here](https://medium.com/@NPCollapse/gpt2-counting-consciousness-and-the-curious-hacker-323c6639a3a8) and [here](https://medium.com/@NPCollapse/replicating-gpt2-1-5b-86454a7f26af) for more info.
 
 `python3 download_model.py PrettyBig`
 
@@ -58,7 +58,7 @@ This assumes you have a version of the openwebtext corpus stored in an accessibl
 
 
 ## Generating the Dataset
-GPT2 is trained on the webtext corpus, which is basically all websites linked to from reddit with at least 3 Karma. Since the database is huge and contains a lot of copyrighted material, I can't provide a download here. Instead I'll describe how I got it. Be aware it cost me around ~500€ in cloud compute resources to donwload and process the whole thing, but I'm not claiming I was optimally efficient. 
+GPT2 is trained on the webtext corpus, which is basically all websites linked to from reddit with at least 3 Karma. Since the database is huge and contains a lot of copyrighted material, I can't provide a download here. Instead I'll describe how I got it. Be aware it cost me around ~500€ in cloud compute resources to download and process the whole thing, but I'm not claiming I was optimally efficient. 
 1. Use the download script from [here](https://github.com/jcpeterson/openwebtext) to download the archives (I used the prefiltered URLs file)
 2. Use *datasets/run_newspaper_extract.py* to extract the text
 3. Once you have the raw .txt files use *datasets/create_tfrecords.py* to encode them into .tfrecords files (Requires a copy of the encoder, see Downloading Pretrained Models)
