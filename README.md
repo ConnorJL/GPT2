@@ -1,7 +1,7 @@
 # GPT2
 **This is not the official GPT2 implementation!**
 
-An implementation of training for [GPT2](https://openai.com/blog/better-language-models/) that supports both GPUs and TPUs. The dataset scripts are a bit hack-y and will probably need to be adapted to your needs. 
+An implementation of training for [GPT2](https://openai.com/blog/better-language-models/) that supports both GPUs and TPUs. The dataset scripts are a bit hacky and will probably need to be adapted to your needs. 
 ## Requirements
 For GPUs:
 
@@ -31,7 +31,7 @@ If you only want the encoder, use:
 `python3 download_model.py encoder`
 
 ## Generating Text
-To predict you can either pass the prompt directly in the command line, or have it read from a file. (This is useful for prompts that include new lines) Text is output to the console and the file specified in the "predict_path" parameter. You need a model checkpoint and a copy of the BPE encoder at an accessible location for this to work. (Change the "model_dir" and "encoder_path" parameters in the .json)
+To predict you can either pass the prompt directly in the command line, or have it read from a file. (This is useful for prompts that include newlines) Text is output to the console and the file specified in the "predict_path" parameter. You need a model checkpoint and a copy of the BPE encoder at an accessible location for this to work. (Change the "model_dir" and "encoder_path" parameters in the .json)
 
 From command line:
 
@@ -58,7 +58,7 @@ This assumes you have a version of the openwebtext corpus stored in an accessibl
 
 
 ## Generating the Dataset
-GPT2 is trained on the webtext corpus, which is basically all websites linked to from reddit with at least 3 Karma. Since the database is huge and contains a lot of copyrighted material, I can't provide a download here. Instead I'll describe how I got it. Be aware it cost me around ~500€ in cloud compute resources to download and process the whole thing, but I'm not claiming I was optimally efficient. 
+GPT2 is trained on the webtext corpus, which is basically all websites linked to from Reddit with at least 3 Karma. Since the database is huge and contains a lot of copyrighted material, I can't provide a download here. Instead, I'll describe how I got it. Be aware it cost me around ~500€ in cloud compute resources to download and process the whole thing, but I'm not claiming I was optimally efficient. 
 1. Use the download script from [here](https://github.com/jcpeterson/openwebtext) to download the archives (I used the prefiltered URLs file)
 2. Use *datasets/run_newspaper_extract.py* to extract the text
 3. Once you have the raw .txt files use *datasets/create_tfrecords.py* to encode them into .tfrecords files (Requires a copy of the encoder, see Downloading Pretrained Models)
