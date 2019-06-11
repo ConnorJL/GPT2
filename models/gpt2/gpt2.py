@@ -161,7 +161,8 @@ def _assert_float_dtype(dtype):
 
 # Initializer that scales the parameters as in the original paper
 class ScaledNormalInitializer(tf.keras.initializers.Initializer):
-    def __init__(self, mean=0.0, stddev=1.0, seed=None, dtype=tf.dtypes.float32, scale=1.0):
+    #def __init__(self, mean=0.0, stddev=1.0, seed=None, dtype=tf.dtypes.float32, scale=1.0):
+    def __init__(self, mean=0.0, stddev=1.0, seed=None, dtype=tf.float32, scale=1.0):
         self.mean = mean
         self.stddev = stddev
         self.seed = seed
