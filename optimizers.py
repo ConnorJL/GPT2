@@ -5,7 +5,7 @@ import tensorflow as tf
 def create_train_op(loss, params):
     lr = params["lr"]
     if "warmup_steps" in params.keys():
-        lr = cosine_decay_with_warmup(tf.train.get_global_step(), lr, 
+        lr = cosine_decay_with_warmup(tf.train.get_global_step(), lr,
                                         params["max_steps"], warmup_steps=params["warmup_steps"])
 
     if params["opt_name"] == "adam":
@@ -51,7 +51,7 @@ def create_train_op(loss, params):
 
     else:
         raise ValueError("Unknown optimizer type!")
-        
+
     if params["use_tpu"]:
         optimizer = tf.contrib.tpu.CrossShardOptimizer(optimizer)
 

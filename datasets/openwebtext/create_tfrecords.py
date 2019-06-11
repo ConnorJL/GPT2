@@ -50,7 +50,7 @@ def create_file(args):
         return
     if os.path.exists(os.path.join(output_dir, s)): # Unfinished file, remove
         os.remove(os.path.join(output_dir, s))
-    
+
     with tf.python_io.TFRecordWriter(os.path.join(output_dir, s)) as writer:
         good_files = 0
         current = None

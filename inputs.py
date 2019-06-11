@@ -44,7 +44,7 @@ def generic_text(params):
     datasets = [bpe_text(params["batch_size"], dataset[0], amount=params["n_ctx"], iterations=params["iterations"], stitch=params["stitch"], batch=False)
                 for dataset in params["dataset"]]
     weights = [dataset[1] for dataset in params["dataset"]]
-    
+
     dataset = tf.data.experimental.sample_from_datasets(datasets, weights=weights)
     dataset = dataset.batch(params["batch_size"], drop_remainder=True).prefetch(params["iterations"] * 2)
 
@@ -65,9 +65,9 @@ def bpe_text(batch_size, files, iterations, stitch, amount=1024, batch=True):
     dataset = dataset.map(_parse_function, num_parallel_calls=1).shuffle(1000 * stitch)
 
     # Since samples can be less than the correct length, and TPUs don't like variable lengths, this function stitches together enough samples
-    # to have a text at least 1024 tokens long. For this to work the stitch parameter must be correctly tuned so that 
+    # to have a text at least 1024 tokens long. For this to work the stitch parameter must be correctly tuned so that
     # stitch * min(characters_in_text) >= amount
-    def _stitch_text(x, y): 
+    def _stitch_text(x, y):
         x = tf.sparse.to_dense(x)
 
         def _get_x(i):
@@ -76,7 +76,7 @@ def bpe_text(batch_size, files, iterations, stitch, amount=1024, batch=True):
         out = _get_x(0)
         for i in range(1, stitch):
             out = tf.concat([out, [50256], _get_x(i)], axis=0) # text1<|endoftext|>text2
-        
+
         return out
 
     # Hack-y way to stitch together multiple texts
@@ -113,6 +113,6 @@ def gpt2_pred_input(params, text=None):
     tokens = enc.encode(text)
     if len(tokens) > 1024:
         tokens = tokens[:1024]
-    t = tf.broadcast_to(tokens, [params["batch_size"], len(tokens)]) 
-    dataset = tf.data.Dataset.from_tensors(t) 
+    t = tf.broadcast_to(tokens, [params["batch_size"], len(tokens)])
+    dataset = tf.data.Dataset.from_tensors(t)
     return dataset

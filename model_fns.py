@@ -18,19 +18,19 @@ def gpt2_model(features, labels, mode, params):
                                     train=mode==tf.estimator.ModeKeys.TRAIN)
 
             output["logits"] = tf.cast(output["logits"], tf.float32)
-            
+
         else:
             output = gpt2.model(X=features, params=params,
                                     labels=labels,
                                     past=None, reuse=tf.AUTO_REUSE,
                                     train=mode==tf.estimator.ModeKeys.TRAIN)
-                                    
+
         loss_batch = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=output["logits"], labels=labels)
         loss = tf.reduce_mean(loss_batch)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
         train_op = create_train_op(loss, params)
-    
+
         if params["use_tpu"]:
             return tf.contrib.tpu.TPUEstimatorSpec(mode, loss=loss, train_op=train_op)
         else:
@@ -42,10 +42,10 @@ def gpt2_model(features, labels, mode, params):
 
         if params["use_tpu"]:
             # Metric inputs are transferred to CPU and must preserve batch dimension
-            return tf.contrib.tpu.TPUEstimatorSpec(mode=mode, 
+            return tf.contrib.tpu.TPUEstimatorSpec(mode=mode,
                 loss=loss, eval_metrics=(perplexity_metric, {"loss": loss_batch}))
         else:
-            return tf.estimator.EstimatorSpec(mode=mode, 
+            return tf.estimator.EstimatorSpec(mode=mode,
                 loss=loss, eval_metric_ops=perplexity_metric(loss_batch))
 
 
@@ -61,7 +61,7 @@ def gpt2_model(features, labels, mode, params):
             batch_size=params["batch_size"],
             temperature=1.0, top_k=params["top_k"]
         )
-        
+
         predictions = {
             "tokens": output
         }

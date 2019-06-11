@@ -75,7 +75,7 @@ class HyperParameter(object):
                 return val
             else:
                 raise RuntimeError("{} ran out of values!".format(self.name))
-        
+
         # Sample randomly from a list of values
         elif self.distribution == "sample":
             return random.sample(self.values)
@@ -111,7 +111,7 @@ def generate_experiments(base, parameters, number):
                 ex[p.name] = p.get_value()
 
         experiments.append(ex)
-    
+
     return experiments
 
 parameters = [
