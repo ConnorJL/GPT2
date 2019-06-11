@@ -42,7 +42,7 @@ class TPUSurvival(object):
             self.done = d["done"]
 
 
-        
+
         # current running job
         self.current_process = None
         self.state = None

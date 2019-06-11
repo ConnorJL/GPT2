@@ -15,7 +15,7 @@ from predict_fns import *
 # This program was designed to function with multiple kinds of models, but currently only GPT2 is supported
 # The first element in the tupel is the model function, the second is the function called when predicting
 models = {
-    "GPT2": (gpt2_model, gpt2_predict) 
+    "GPT2": (gpt2_model, gpt2_predict)
 }
 
 inputs = {
@@ -46,8 +46,8 @@ if __name__ == "__main__":
     elif args.predict_file is not None and args.predict_text is not None:
         print("ERROR: Specify exactly one of --predict_file and --predict_text!")
         sys.exit()
-    
-    
+
+
     # Setup logging
     Path("logs").mkdir(exist_ok=True)
     tf.logging.set_verbosity(logging.INFO)
@@ -91,7 +91,7 @@ if __name__ == "__main__":
             cluster=tpu_cluster_resolver,
             save_checkpoints_secs=60*30,
             session_config=tf.ConfigProto(
-                # allow_soft_placement=True, 
+                # allow_soft_placement=True,
                 # log_device_placement=True
                 ),
                 tpu_config=tf.contrib.tpu.TPUConfig(iterations_per_loop=params["iterations"])
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         network.train(
                 input_fn=partial(input_fn, eval=False),
                 steps=params["train_steps"])
-                
+
 
         end = time.time()
         logger.info("\nTrain loop took {:.2f}s\n".format(end-start))
@@ -146,7 +146,7 @@ if __name__ == "__main__":
         eval_result = network.evaluate(
            input_fn=partial(input_fn, eval=True),
            steps=params["eval_steps"])
-        
+
         logger.info("\nEval Results: {}\n".format(str(eval_result)))
 
         if network.get_variable_value("global_step") > params["max_steps"]:

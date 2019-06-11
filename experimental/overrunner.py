@@ -39,7 +39,7 @@ def save(runners):
     states = []
     for r in runners:
         states.append(r.dump_dict())
-    
+
     with open("logs/state.json", "w") as f:
         json.dump(states, f)
 
@@ -51,7 +51,7 @@ try:
             if ts.done:
                 runners.remove(ts)
                 continue
-            
+
             ts.update_state()
             logging.info("{} - TPU State: {} - Process Running: {}".format(ts.prefix, ts.state, ts.task_running))
 
@@ -86,7 +86,7 @@ try:
 
             if ts.running_time > 60*60*24: # Make a hard checkpoint save every day
                 logging.info("Backing up {}".format(ts.prefix))
-                subprocess.call(["gsutil", "cp", "-r", ts.params["model_dir"], 
+                subprocess.call(["gsutil", "cp", "-r", ts.params["model_dir"],
                     os.path.join(backup_path, ts.params["model_dir"].split("/")[-1] + "-" + str(ts.current_save))])
                 ts.current_save += 1
 
