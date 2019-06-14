@@ -60,8 +60,10 @@ This assumes you have a version of the openwebtext corpus stored in an accessibl
 ## Generating the Dataset
 GPT2 is trained on the webtext corpus, which is basically all websites linked to from Reddit with at least 3 Karma. Since the database is huge and contains a lot of copyrighted material, I can't provide a download here. Instead, I'll describe how I got it. Be aware it cost me around ~500€ in cloud compute resources to download and process the whole thing, but I'm not claiming I was optimally efficient. 
 1. Use the download script from [here](https://github.com/jcpeterson/openwebtext) to download the archives (I used the prefiltered URLs file)
-2. Use *datasets/run_newspaper_extract.py* to extract the text
-3. Once you have the raw .txt files use *datasets/create_tfrecords.py* to encode them into .tfrecords files (Requires a copy of the encoder, see Downloading Pretrained Models)
+2. Use *datasets/openwebtext/
+run_newspaper_extract.py* to extract the text
+3. Once you have the raw .txt files use *datasets/openwebtext/
+create_tfrecords.py* to encode them into .tfrecords files (Requires a copy of the encoder, see Downloading Pretrained Models)
 4. Place the .tfrecords files into an accessible folder or Google Storage bucket (Placing in a Google Storage bucket is mandatory if you're using TPUs)
 5. Change the "data_path" parameter in your .json to point to where your .tfrecords files are located and, if necessary, adapt the functions in *inputs.py* to open the correct filenames, in case you changed them
 
