@@ -18,6 +18,7 @@ log_dir = "logs"
 files = glob.glob(os.path.join(base_dir, "**/*.txt"))
 processes = 64 # Number of encoding processes to run
 encoder_path = "gs://openwebtext/stuff/encoder" # Path to encoder files
+minimum_size = 25
 
 def _int64_feature(value):
     """Returns an int64_list from a bool / enum / int / uint."""
@@ -59,7 +60,7 @@ def create_file(args):
                 d = f.read()
             d = ftfy.fix_text(d, normalization='NFKC')
             data = np.array(enc.encode(d), np.int32)
-            if data.shape[0] < 25 or (data == 0).all(): # If text is shorter than 25 tokens, or all tokens are 0, ignore
+            if data.shape[0] < minimum_size or (data == 0).all(): # If text is shorter than 25 tokens, or all tokens are 0, ignore
                 continue
             hash = fn.split("/")[-1].split(".")[0]
             feature = {
