@@ -113,6 +113,14 @@ if __name__ == "__main__":
             params["batch_size"] = params["train_batch_size"]
         else:
             params["batch_size"] = params["predict_batch_size"]
+
+            from models.gpt2 import encoder
+            enc = encoder.get_encoder(params["encoder_path"])
+            tokens = enc.encode(text)
+            params["text_len"] = len(tokens)
+            if params["text_len"] > 1024:
+                params["text_len"] = 1024
+
         run_config = tf.estimator.RunConfig(
             model_dir=params["model_path"],
             session_config=tf.ConfigProto(
@@ -128,12 +136,6 @@ if __name__ == "__main__":
 
     if predict_mode:
         logger.info("Generating predictions...")
-        from models.gpt2 import encoder
-        enc = encoder.get_encoder(params["encoder_path"])
-        tokens = enc.encode(text)
-        params["text_len"] = len(tokens)
-        if params["text_len"] > 1024:
-            params["text_len"] = 1024
         predict_fn(network, text, params)
         sys.exit()
 
