@@ -29,6 +29,8 @@ def sample_sequence(*, params, length, start_token=None, batch_size=None, contex
         assert context is None, 'Specify exactly one of start_token and context!'
         context = tf.fill([batch_size, 1], start_token)
 
+    length = length - params["text_len"]
+
     def step(params, tokens, past=None):
         if params["precision"] == 'bfloat16':
             with tf.contrib.tpu.bfloat16_scope():

@@ -128,6 +128,12 @@ if __name__ == "__main__":
 
     if predict_mode:
         logger.info("Generating predictions...")
+        from models.gpt2 import encoder
+        enc = encoder.get_encoder(params["encoder_path"])
+        tokens = enc.encode(text)
+        params["text_len"] = len(tokens)
+        if params["text_len"] > 1024:
+            params["text_len"] = 1024
         predict_fn(network, text, params)
         sys.exit()
 
