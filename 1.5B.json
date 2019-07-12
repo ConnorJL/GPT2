@@ -15,7 +15,6 @@
     "eval_steps": 10,
     "max_steps": 300000,
     "data_path": "gs://connors-datasets/openwebtext/",
-    "scale": 0.14433756729740646,
     "res_dropout": 0.1,
     "predict_batch_size": 1,
     "eval_batch_size": 8,
@@ -28,5 +27,7 @@
     "predict_path": "logs/predictions_1.5B.txt",
     "n_layer": 48,
     "precision": "float32",
-    "weight_decay": 0.01
+    "weight_decay": 0.01,
+    "scale_by_depth": true,
+    "scale_by_in": true
 }

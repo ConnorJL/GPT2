@@ -16,7 +16,6 @@
     "eval_steps": 10,
     "max_steps": 604800,
     "data_path": "gs://connors-datasets/openwebtext/",
-    "scale": 0.14433756729740646,
     "res_dropout": 0.1,
     "predict_batch_size": 1,
     "eval_batch_size": 256,
@@ -27,5 +26,7 @@
     "model_path": "gs://connors-models/GPT2-PrettyBig",
     "n_ctx": 1024,
     "predict_path": "logs/predictions_SortaBig.txt",
-    "n_layer": 25
+    "n_layer": 25,
+    "scale_by_depth": true,
+    "scale_by_in": true
 }

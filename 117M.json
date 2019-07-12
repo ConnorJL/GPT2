@@ -16,7 +16,6 @@
     "eval_steps": 10,
     "max_steps": 500000,
     "data_path": "gs://connors-datasets/openwebtext/",
-    "scale": 0.2886751345948129,
     "res_dropout": 0.1,
     "predict_batch_size": 1,
     "eval_batch_size": 32,
@@ -24,8 +23,10 @@
     "n_embd": 768,
     "input": "openwebtext",
     "model": "GPT2",
-    "model_path": "gs://connors-models/GPT2-117M",
+    "model_path": "gs://connors-models/GPT2-117M-test-newinit",
     "n_ctx": 1024,
     "predict_path": "logs/predictions.txt",
-    "n_layer": 12
+    "n_layer": 12,
+    "scale_by_depth": true,
+    "scale_by_in": true
 }

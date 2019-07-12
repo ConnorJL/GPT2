@@ -137,7 +137,8 @@ Model parameters:
 * **n_embd**: Dimension of embedding layers
 * **n_layer**: Number of layers in the model
 * **n_head**: Number of attention heads (default: n_embd / 64)
-* **scale**: Factor by which to scale initializations of weights (default: 1/sqrt(n_layer))
+* **scale_by_depth**: Whether or not to scale init by the number of layers (Default: true)
+* **scale_by_in**: Whether to scale init by the number of input channels (Default: true)
 
 Training parameters:
 * **precision**: Whether to use float32 or bfloat16 variables (use "bfloat16" when training very large models) (optional, defaults to float32)

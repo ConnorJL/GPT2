@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import tensorflow as tf
 
@@ -42,16 +44,19 @@ def merge_states(x):
     *start, a, b = shape_list(x)
     return tf.reshape(x, start + [a*b])
 
-def conv1d(x, scope, nf, *, w_init_stdev=0.02, scale=1.0, params=None):
+def conv1d(x, scope, nf, *, w_init_stdev=0.02, params=None, scale=False):
+    if params["scale_by_depth"] and scale: # Scale by sqrt(num_layers), only happens at the final projection before a res block output
+        w_init_stdev = w_init_stdev * (1. / math.sqrt(params["n_layer"]))
+    if params["scale_by_in"]: # Scale by sqrt(num_input_features)
+        w_init_stdev = w_init_stdev * (1. / math.sqrt(x.shape[-1].value))
+
     with tf.variable_scope(scope):
         *start, nx = shape_list(x)
-        if scope=="c_attn":
-            scale = 1.0
         if params["precision"] == "bfloat16":
-            w = tf.get_variable('w', [1, nx, nf], initializer=ScaledNormalInitializer(stddev=w_init_stdev, scale=scale, dtype=tf.bfloat16), dtype=tf.bfloat16)
+            w = tf.get_variable('w', [1, nx, nf], initializer=tf.random_normal_initializer(stddev=w_init_stdev, dtype=tf.bfloat16), dtype=tf.bfloat16)
             b = tf.get_variable('b', [nf], initializer=tf.constant_initializer(0, dtype=tf.bfloat16), dtype=tf.bfloat16)
         else:
-            w = tf.get_variable('w', [1, nx, nf], initializer=ScaledNormalInitializer(stddev=w_init_stdev, scale=scale))
+            w = tf.get_variable('w', [1, nx, nf], initializer=tf.random_normal_initializer(stddev=w_init_stdev))
             b = tf.get_variable('b', [nf], initializer=tf.constant_initializer(0))
         c = tf.reshape(tf.matmul(tf.reshape(x, [-1, nx]), tf.reshape(w, [-1, nf]))+b, start+[nf])
         return c
@@ -112,7 +117,7 @@ def attn(x, scope, n_state, *, past, params, train=False):
             v = tf.concat([pv, v], axis=-2)
         a = multihead_attn(q, k, v)
         a = merge_heads(a)
-        a = conv1d(a, 'c_proj', n_state, scale=params["scale"], params=params)
+        a = conv1d(a, 'c_proj', n_state, params=params)
         a = dropout(a, params["res_dropout"], train)
         return a, present
 
@@ -121,7 +126,7 @@ def mlp(x, scope, n_state, *, params, train=False):
     with tf.variable_scope(scope):
         nx = x.shape[-1].value
         h = gelu(conv1d(x, 'c_fc', n_state, params=params))
-        h2 = conv1d(h, 'c_proj', nx, scale=params["scale"], params=params)
+        h2 = conv1d(h, 'c_proj', nx, params=params, scale=True)
         h2 = dropout(h2, params["res_dropout"], train)
         return h2
 
@@ -158,31 +163,6 @@ def _assert_float_dtype(dtype):
     if not dtype.is_floating:
         raise ValueError("Expected floating point type, got %s." % dtype)
     return dtype
-
-# Initializer that scales the parameters as in the original paper
-class ScaledNormalInitializer(tf.keras.initializers.Initializer):
-    #def __init__(self, mean=0.0, stddev=1.0, seed=None, dtype=tf.dtypes.float32, scale=1.0):
-    def __init__(self, mean=0.0, stddev=1.0, seed=None, dtype=tf.float32, scale=1.0):
-        self.mean = mean
-        self.stddev = stddev
-        self.seed = seed
-        self.dtype = _assert_float_dtype(tf.dtypes.as_dtype(dtype))
-        self.scale = scale
-
-    def __call__(self, shape, dtype=None, partition_info=None):
-        if dtype is None:
-            dtype = self.dtype
-        return tf.math.multiply(tf.random.normal(
-            shape, self.mean, self.stddev, dtype, seed=self.seed), self.scale)
-
-    def get_config(self):
-        return {
-            "mean": self.mean,
-            "stddev": self.stddev,
-            "seed": self.seed,
-            "dtype": self.dtype.name,
-            "scale": self.scale
-        }
 
 
 def model(X, params, labels=None, past=None, scope='model', reuse=False, train=False):
