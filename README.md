@@ -1,5 +1,5 @@
 # GPT2
-**This is not the official GPT2 implementation!**
+**Disclaimer: This is not the official GPT2 implementation! I've done my best to follow the specifications of the original GPT2 model as closely as possible, but be warned that I have not been able to replicate the full performance of the original model using this code. I don't know why this is, I haven't been able to track down any bug that could be causing this.**
 
 An implementation of training for [GPT2](https://openai.com/blog/better-language-models/) that supports both GPUs and TPUs. The dataset scripts are a bit hacky and will probably need to be adapted to your needs. 
 ## Requirements
