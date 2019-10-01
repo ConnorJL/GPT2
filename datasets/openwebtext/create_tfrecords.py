@@ -77,13 +77,30 @@ def create_file(args):
         f.write("{}: {} / {}".format(str(i), str(good_files), str(len(chunk))))
 
     return good_files
+def main(
+    base_dir = "/home/connor/2/newspaper" # Path to where your .txt files are located
+    files_per = 175000 # 175000 ~ 200-300MB
+    name = "openwebtext-newspaper" # Name of output files will be name_i.tfrecords where i is the number of the file
+    output_dir = "/home/connor/out"
+    log_dir = "logs"
+    files = glob.glob(os.path.join(base_dir, "**/*.txt"))
+    processes = 64 # Number of encoding processes to run
+    encoder_path = "gs://openwebtext/stuff/encoder" # Path to encoder files
+    minimum_size = 25
+     ):
+    
 
-start = time.time()
-pool = Pool(processes=processes)
-good = 0
-for g in tqdm(pool.imap(create_file, enumerate(file_chunks)), total=len(file_chunks)):
-    good += g
 
-end = time.time()
 
-print("Done! In {:.2f}s, {} / {} good files.".format(end-start, str(good), str(len(files))))
+    start = time.time()
+    pool = Pool(processes=processes)
+    good = 0
+    for g in tqdm(pool.imap(create_file, enumerate(file_chunks)), total=len(file_chunks)):
+        good += g
+
+    end = time.time()
+
+    print("Done! In {:.2f}s, {} / {} good files.".format(end-start, str(good), str(len(files))))
+
+if  __name__=="__main__":
+    main()
