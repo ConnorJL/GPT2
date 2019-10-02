@@ -7,18 +7,59 @@ import ftfy
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
+from absl import flags
 
 import encoder
+
+FLAGS = flags.FLAGS
 
 base_dir = "/home/connor/2/newspaper" # Path to where your .txt files are located
 files_per = 175000 # 175000 ~ 200-300MB
 name = "openwebtext-newspaper" # Name of output files will be name_i.tfrecords where i is the number of the file
 output_dir = "/home/connor/out"
 log_dir = "logs"
-files = glob.glob(os.path.join(base_dir, "**/*.txt"))
+
 processes = 64 # Number of encoding processes to run
 encoder_path = "gs://openwebtext/stuff/encoder" # Path to encoder files
 minimum_size = 25
+
+flags.DEFINE_string(
+    "base_dir",
+    default="/home/connor/2/newspaper",
+    help="Path to where your .txt files are located.")
+
+
+flags.DEFINE_string(
+    "output_dir",
+    default="/home/connor/out",
+    )
+flags.DEFINE_string(
+    "log_dir",
+    default="logs",
+    )
+flags.DEFINE_string(
+    "encoder_path",
+    default="gs://openwebtext/stuff/encoder" ,
+    help="Path to encoder files")
+
+
+flags.DEFINE_string(
+    "name",
+    default="openwebtext-newspaper",
+    help="Name of output files will be name_i.tfrecords where i is the number of the file")
+
+
+flags.DEFINE_integer("processes",
+                     default=64,
+                    help="Number of encoding processes to run")
+flags.DEFINE_integer("minimum_size",
+                     default=25,
+                     help="minimum text size"
+                    )
+flags.DEFINE_integer("files_per",
+                     default=1500,
+                    help="file chunk size")
+
 
 def _int64_feature(value):
     """Returns an int64_list from a bool / enum / int / uint."""
@@ -78,19 +119,19 @@ def create_file(args):
 
     return good_files
 def main(
-    base_dir = "/home/connor/2/newspaper" # Path to where your .txt files are located
-    files_per = 175000 # 175000 ~ 200-300MB
-    name = "openwebtext-newspaper" # Name of output files will be name_i.tfrecords where i is the number of the file
-    output_dir = "/home/connor/out"
-    log_dir = "logs"
-    files = glob.glob(os.path.join(base_dir, "**/*.txt"))
-    processes = 64 # Number of encoding processes to run
-    encoder_path = "gs://openwebtext/stuff/encoder" # Path to encoder files
+    base_dir = "/home/connor/2/newspaper" ,# Path to where your .txt files are located
+    files_per = 175000 ,# 175000 ~ 200-300MB
+    name = "openwebtext-newspaper", # Name of output files will be name_i.tfrecords where i is the number of the file
+    output_dir = "/home/connor/out",
+    log_dir = "logs",
+   
+    processes = 64, # Number of encoding processes to run
+    encoder_path = "gs://openwebtext/stuff/encoder" ,# Path to encoder files
     minimum_size = 25
      ):
     
 
-
+    files = glob.glob(os.path.join(base_dir, "**/*.txt"))
 
     start = time.time()
     pool = Pool(processes=processes)
