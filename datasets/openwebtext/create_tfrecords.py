@@ -118,19 +118,20 @@ def create_file(args):
         f.write("{}: {} / {}".format(str(i), str(good_files), str(len(chunk))))
 
     return good_files
-def main(
-    base_dir = "/home/connor/2/newspaper" ,# Path to where your .txt files are located
-    files_per = 175000 ,# 175000 ~ 200-300MB
-    name = "openwebtext-newspaper", # Name of output files will be name_i.tfrecords where i is the number of the file
-    output_dir = "/home/connor/out",
-    log_dir = "logs",
-   
-    processes = 64, # Number of encoding processes to run
-    encoder_path = "gs://openwebtext/stuff/encoder" ,# Path to encoder files
-    minimum_size = 25
-     ):
-    
 
+
+def main(argv  ):
+    if FLAGS.debug:
+        print('non-flag arguments:', argv)
+    base_dir = FLAGS.base_dir ,# Path to where your .txt files are located
+    files_per =FLAGS.files_per ,# 175000 ~ 200-300MB
+    name = FLAGS.name, # Name of output files will be name_i.tfrecords where i is the number of the file
+    output_dir = FLAGS.output_dir,
+    log_dir = FLAGS.log_dir,
+    processes = FLAGS.processes, # Number of encoding processes to run
+    encoder_path =FLAGS.encoder_path ,# Path to encoder files
+    minimum_size = FLAGS.minimum_size
+    
     files = glob.glob(os.path.join(base_dir, "**/*.txt"))
 
     start = time.time()
@@ -143,15 +144,5 @@ def main(
 
     print("Done! In {:.2f}s, {} / {} good files.".format(end-start, str(good), str(len(files))))
 
-if  __name__=="__main__":
-    main(    
-        base_dir = FLAGS.base_dir ,# Path to where your .txt files are located
-        files_per =FLAGS.files_per ,# 175000 ~ 200-300MB
-        name = FLAGS.name, # Name of output files will be name_i.tfrecords where i is the number of the file
-        output_dir = FLAGS.output_dir,
-        log_dir = FLAGS.log_dir,
-
-        processes = FLAGS.processes, # Number of encoding processes to run
-        encoder_path =FLAGS.encoder_path ,# Path to encoder files
-        minimum_size = FLAGS.minimum_size
-    )
+if __name__ == '__main__':
+  app.run(main)
