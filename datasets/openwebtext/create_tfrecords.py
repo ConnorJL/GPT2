@@ -14,15 +14,6 @@ import encoder
 
 FLAGS = flags.FLAGS
 
-base_dir = "/home/connor/2/newspaper" # Path to where your .txt files are located
-files_per = 175000 # 175000 ~ 200-300MB
-name = "openwebtext-newspaper" # Name of output files will be name_i.tfrecords where i is the number of the file
-output_dir = "/home/connor/out"
-log_dir = "logs"
-
-processes = 64 # Number of encoding processes to run
-encoder_path = "gs://openwebtext/stuff/encoder" # Path to encoder files
-minimum_size = 25
 
 flags.DEFINE_string(
     "base_dir",
@@ -118,7 +109,7 @@ def main(argv  ):
     global enc
     global files
 
-    base_dir = FLAGS.base_dir[0] ,# Path to where your .txt files are located
+    base_dir = FLAGS.base_dir ,# Path to where your .txt files are located
     files_per =FLAGS.files_per ,# 175000 ~ 200-300MB
     name = FLAGS.name, # Name of output files will be name_i.tfrecords where i is the number of the file
     output_dir = FLAGS.output_dir,
