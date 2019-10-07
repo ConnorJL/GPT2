@@ -117,10 +117,7 @@ def create_file(args):
 def main(argv  ):
     global enc
     global files
-    
-    
-    if FLAGS.debug:
-        print('non-flag arguments:', argv)
+
     base_dir = FLAGS.base_dir ,# Path to where your .txt files are located
     files_per =FLAGS.files_per ,# 175000 ~ 200-300MB
     name = FLAGS.name, # Name of output files will be name_i.tfrecords where i is the number of the file
