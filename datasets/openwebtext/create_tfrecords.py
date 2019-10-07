@@ -34,11 +34,7 @@ flags.DEFINE_string(
     default="/home/connor/out",
     help="destination dir for tfrecords"
     )
-flags.DEFINE_string(
-    "log_dir",
-    default="logs",
-    help="log dir"
-    )
+
 flags.DEFINE_string(
     "encoder_path",
     default="gs://openwebtext/stuff/encoder" ,
