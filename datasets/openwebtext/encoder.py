@@ -107,9 +107,9 @@ class Encoder:
         return text
 
 def get_encoder(encoder_path):
-    with tf.gfile.Open(os.path.join(encoder_path, 'encoder.json'), 'r') as f:
+    with tf.io.gfile.Open(os.path.join(encoder_path, 'encoder.json'), 'r') as f:
         encoder = json.load(f)
-    with tf.gfile.Open(os.path.join(encoder_path, 'vocab.bpe'), 'r') as f: # utf-8?
+    with tf.io.gfile.Open(os.path.join(encoder_path, 'vocab.bpe'), 'r') as f: # utf-8?
         bpe_data = f.read()
     bpe_merges = [tuple(merge_str.split()) for merge_str in bpe_data.split('\n')[1:-1]]
     return Encoder(
