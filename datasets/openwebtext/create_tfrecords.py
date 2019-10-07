@@ -32,10 +32,12 @@ flags.DEFINE_string(
 flags.DEFINE_string(
     "output_dir",
     default="/home/connor/out",
+    help="destination dir for tfrecords"
     )
 flags.DEFINE_string(
     "log_dir",
     default="logs",
+    help="log dir"
     )
 flags.DEFINE_string(
     "encoder_path",
