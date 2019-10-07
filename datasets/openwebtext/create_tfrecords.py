@@ -77,11 +77,6 @@ def chunks(l, n):
 if not os.path.exists(log_dir):
     os.mkdir(log_dir)
 
-enc = encoder.get_encoder(encoder_path)
-
-file_chunks = chunks(files, files_per)
-
-print("Got {} files, divided into {} chunks.".format(str(len(files)), str(len(file_chunks))))
 
 def create_file(args):
     i, chunk = args
@@ -119,6 +114,10 @@ def create_file(args):
 
 
 def main(argv  ):
+    global enc
+    global files
+    
+    
     if FLAGS.debug:
         print('non-flag arguments:', argv)
     base_dir = FLAGS.base_dir ,# Path to where your .txt files are located
@@ -130,7 +129,18 @@ def main(argv  ):
     encoder_path =FLAGS.encoder_path ,# Path to encoder files
     minimum_size = FLAGS.minimum_size
     
+    
+    
+    
+    
     files = glob.glob(os.path.join(base_dir, "**/*.txt"))
+    
+    
+    enc = encoder.get_encoder(encoder_path)
+
+    file_chunks = chunks(files, files_per)
+
+    print("Got {} files, divided into {} chunks.".format(str(len(files)), str(len(file_chunks))))
 
     start = time.time()
     pool = Pool(processes=processes)
