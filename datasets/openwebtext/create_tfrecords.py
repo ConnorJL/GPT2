@@ -144,4 +144,14 @@ def main(
     print("Done! In {:.2f}s, {} / {} good files.".format(end-start, str(good), str(len(files))))
 
 if  __name__=="__main__":
-    main()
+    main(    
+        base_dir = FLAGS.base_dir ,# Path to where your .txt files are located
+        files_per =FLAGS.files_per ,# 175000 ~ 200-300MB
+        name = FLAGS.name, # Name of output files will be name_i.tfrecords where i is the number of the file
+        output_dir = FLAGS.output_dir,
+        log_dir = FLAGS.log_dir,
+
+        processes = FLAGS.processes, # Number of encoding processes to run
+        encoder_path =FLAGS.encoder_path ,# Path to encoder files
+        minimum_size = FLAGS.minimum_size
+    )
