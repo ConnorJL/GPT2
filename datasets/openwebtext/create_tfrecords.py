@@ -7,6 +7,7 @@ import ftfy
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
+from absl import app
 from absl import flags
 
 import encoder
