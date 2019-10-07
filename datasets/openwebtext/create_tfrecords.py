@@ -95,7 +95,7 @@ def create_file(args):
         good_files = 0
         current = None
         for fn in chunk:
-            with tf.gfile.Open(fn, "r") as f:
+            with tf.io.gfile.Open(fn, "r") as f:
                 d = f.read()
             d = ftfy.fix_text(d, normalization='NFKC')
             data = np.array(enc.encode(d), np.int32)
