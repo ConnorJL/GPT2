@@ -131,7 +131,7 @@ def main(argv  ):
     
     
     
-    files = glob.glob(os.path.join(base_dir, "**/*.txt"))
+    files = glob.glob(os.path.join(str(base_dir), "**/*.txt"), recursive=True)
     
     
     enc = encoder.get_encoder(encoder_path)
