@@ -20,7 +20,7 @@ For generating the dataset (in addition to Tensorflow):
 `pip3 install ftfy tqdm newspaper3k`
 
 ## Downloading Pretrained Models
-If you want to use my models, I currently have "117M" and "PrettyBig" to offer. 117M was trained on a single v2 TPU for a week (probably less than the original OpenAI model), PrettyBig is slightly bigger than 345M and was trained on a v2-256 pod for a week. I was originally also planning to release my version of the 1.5B model, but have decided against it. You can read about my reasoning [here](https://medium.com/@NPCollapse/the-hacker-learns-to-trust-62f3c1490f51).
+If you want to use my models, I currently have "117M", "PrettyBig" and "1.5B" to offer. 117M was trained on a single v2 TPU for a week (probably less than the original OpenAI model), PrettyBig is slightly bigger than 345M and was trained on a v2-256 pod for a week. ~~I was originally also planning to release my version of the 1.5B model, but have decided against it. You can read about my reasoning [here](https://medium.com/@NPCollapse/the-hacker-learns-to-trust-62f3c1490f51).~~ Since OpenAI has released their model, I have now also released my (inferior) 1.5B model, which was trained on a v3-512 pod for a week.
 
 `python3 download_model.py PrettyBig`
 

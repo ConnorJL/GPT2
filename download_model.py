@@ -9,8 +9,8 @@ if len(sys.argv) != 2:
 
 model = sys.argv[1]
 
-if model not in ["117M", "PrettyBig", "encoder"]:
-    print("Unknown model! Currently available models: 117M, SortaBig")
+if model not in ["117M", "PrettyBig", "encoder", "1.5B"]:
+    print("Unknown model! Currently available models: 117M, SortaBig, 1.5B")
     sys.exit(1)
 
 
