@@ -7,18 +7,49 @@ import ftfy
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
+from absl import app
+from absl import flags
 
 import encoder
 
-base_dir = "/home/connor/2/newspaper" # Path to where your .txt files are located
-files_per = 175000 # 175000 ~ 200-300MB
-name = "openwebtext-newspaper" # Name of output files will be name_i.tfrecords where i is the number of the file
-output_dir = "/home/connor/out"
-log_dir = "logs"
-files = glob.glob(os.path.join(base_dir, "**/*.txt"))
-processes = 64 # Number of encoding processes to run
-encoder_path = "gs://openwebtext/stuff/encoder" # Path to encoder files
-minimum_size = 25
+FLAGS = flags.FLAGS
+
+
+flags.DEFINE_string(
+    "base_dir",
+    default="/home/connor/2/newspaper",
+    help="Path to where your .txt files are located.")
+
+
+flags.DEFINE_string(
+    "output_dir",
+    default="/home/connor/out",
+    help="destination dir for tfrecords"
+    )
+
+flags.DEFINE_string(
+    "encoder_path",
+    default="gs://openwebtext/stuff/encoder" ,
+    help="Path to encoder files")
+
+
+flags.DEFINE_string(
+    "name",
+    default="openwebtext-newspaper",
+    help="Name of output files will be name_i.tfrecords where i is the number of the file")
+
+
+flags.DEFINE_integer("processes",
+                     default=64,
+                    help="Number of encoding processes to run")
+flags.DEFINE_integer("minimum_size",
+                     default=25,
+                     help="minimum text size"
+                    )
+flags.DEFINE_integer("files_per",
+                     default=1500,
+                    help="file chunk size")
+
 
 def _int64_feature(value):
     """Returns an int64_list from a bool / enum / int / uint."""
@@ -38,11 +69,6 @@ def chunks(l, n):
 if not os.path.exists(log_dir):
     os.mkdir(log_dir)
 
-enc = encoder.get_encoder(encoder_path)
-
-file_chunks = chunks(files, files_per)
-
-print("Got {} files, divided into {} chunks.".format(str(len(files)), str(len(file_chunks))))
 
 def create_file(args):
     i, chunk = args
@@ -56,7 +82,7 @@ def create_file(args):
         good_files = 0
         current = None
         for fn in chunk:
-            with tf.gfile.Open(fn, "r") as f:
+            with tf.io.gfile.Open(fn, "r") as f:
                 d = f.read()
             d = ftfy.fix_text(d, normalization='NFKC')
             data = np.array(enc.encode(d), np.int32)
@@ -78,12 +104,42 @@ def create_file(args):
 
     return good_files
 
-start = time.time()
-pool = Pool(processes=processes)
-good = 0
-for g in tqdm(pool.imap(create_file, enumerate(file_chunks)), total=len(file_chunks)):
-    good += g
 
-end = time.time()
+def main(argv  ):
+    global enc
+    global files
 
-print("Done! In {:.2f}s, {} / {} good files.".format(end-start, str(good), str(len(files))))
+    base_dir = FLAGS.base_dir ,# Path to where your .txt files are located
+    files_per =FLAGS.files_per ,# 175000 ~ 200-300MB
+    name = FLAGS.name, # Name of output files will be name_i.tfrecords where i is the number of the file
+    output_dir = FLAGS.output_dir,
+    log_dir = FLAGS.log_dir,
+    processes = FLAGS.processes, # Number of encoding processes to run
+    encoder_path =FLAGS.encoder_path ,# Path to encoder files
+    minimum_size = FLAGS.minimum_size
+    
+    
+    
+    
+    print(base_dir)
+    files = glob.glob(os.path.join(base_dir[0], "/**/*.txt"), recursive=True)
+    
+    
+    enc = encoder.get_encoder(encoder_path)
+
+    file_chunks = chunks(files, files_per)
+
+    print("Got {} files, divided into {} chunks.".format(str(len(files)), str(len(file_chunks))))
+
+    start = time.time()
+    pool = Pool(processes=processes)
+    good = 0
+    for g in tqdm(pool.imap(create_file, enumerate(file_chunks)), total=len(file_chunks)):
+        good += g
+
+    end = time.time()
+
+    print("Done! In {:.2f}s, {} / {} good files.".format(end-start, str(good), str(len(files))))
+
+if __name__ == '__main__':
+  app.run(main)
